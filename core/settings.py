@@ -4,12 +4,12 @@ from pathlib import Path
 # Корень проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Безопасность (не меняй SECRET_KEY в процессе разработки)
+# Безопасность
 SECRET_KEY = 'django-insecure-90gbdsq2#!0kvp9orgl)v6$)hzx(_vy6^a%)@(4=4ucb+9x7zk'
 
 DEBUG = True
 
-# РАЗРЕШЕННЫЕ АДРЕСА: твой локальный IP и стандартные локалхосты
+# РАЗРЕШЕННЫЕ АДРЕСА: локальный IP и стандартные локалхосты
 ALLOWED_HOSTS = ['192.168.0.111', '127.0.0.1', 'localhost']
 
 
@@ -21,6 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Модуль для красивого вывода чисел (разделители тысяч)
+    'django.contrib.humanize',
     
     # Твое приложение
     'orders',
@@ -56,7 +59,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
-# БАЗА ДАННЫХ (пока SQLite для скорости)
+# БАЗА ДАННЫХ
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -74,15 +77,26 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# ИНТЕРНАЦИОНАЛИЗАЦИЯ (Настройки для Алматы)
+# ИНТЕРНАЦИОНАЛИЗАЦИЯ
 LANGUAGE_CODE = 'ru'
 TIME_ZONE = 'Asia/Almaty'
 
 USE_I18N = True
 USE_TZ = True
 
+# НАСТРОЙКИ ФОРМАТИРОВАНИЯ ЧИСЕЛ (для цен с пробелами)
+USE_L10N = True
+USE_THOUSAND_SEPARATOR = True
+THOUSAND_SEPARATOR = ' '
+NUMBER_GROUPING = 3
 
-# СТАТИКА (CSS, JS, Картинки)
+
+# СТАТИКА
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# НАСТРОЙКИ АВТОРИЗАЦИИ
+LOGIN_REDIRECT_URL = 'order_list'
+LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = 'login'

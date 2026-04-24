@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load humanize %} {% block content %}
 <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
     <div>
         <h1 class="text-4xl font-light text-[#1a1b1f]">Рабочий поток</h1>
@@ -26,7 +26,7 @@
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
     <div class="surface p-8 bg-[#d3e4ff] transition-transform hover:scale-[1.02]">
         <p class="text-xs font-bold text-[#001c3b] uppercase tracking-wider">Касса сегодня</p>
-        <p class="text-4xl font-bold mt-2 text-[#001c3b]">{{ total_today|default:"0" }} <span class="text-lg font-normal">₸</span></p>
+        <p class="text-4xl font-bold mt-2 text-[#001c3b]">{{ total_today|floatformat:0|intcomma }} <span class="text-lg font-normal">₸</span></p>
     </div>
     
     <div class="surface p-8 bg-white border-[#e1e2ec] transition-transform hover:scale-[1.02]">
@@ -74,7 +74,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-5 font-bold text-[#1a1b1f] whitespace-nowrap">
-                        {{ o.total_amount }} <span class="text-[10px] font-normal text-slate-400 ml-1 italic">₸</span>
+                        {{ o.total_amount|floatformat:0|intcomma }} <span class="text-[10px] font-normal text-slate-400 ml-1 italic">₸</span>
                     </td>
                     <td class="px-8 py-5 text-right">
                         <div class="flex justify-end gap-2">

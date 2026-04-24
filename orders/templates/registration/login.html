@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-md mx-auto mt-20">
+    <div class="surface p-10 bg-white border-[#e1e2ec] shadow-2xl text-center">
+        <div class="w-16 h-16 bg-[#005ac1] rounded-2xl flex items-center justify-center text-white mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+        </div>
+        <h1 class="text-3xl font-light mb-2">Вход в TypoFlow</h1>
+        <p class="text-[#44474e] text-sm mb-8 italic">Введите данные для доступа к CRM</p>
+
+        <form method="post" class="space-y-6 text-left">
+            {% csrf_token %}
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-[#005ac1] uppercase ml-1">Логин</label>
+                <input type="text" name="username" class="m3-input bg-[#f0f0f3]" required>
+            </div>
+            <div class="space-y-2">
+                <label class="text-xs font-bold text-[#005ac1] uppercase ml-1">Пароль</label>
+                <input type="password" name="password" class="m3-input bg-[#f0f0f3]" required>
+            </div>
+            
+            {% if form.errors %}
+                <p class="text-red-500 text-xs text-center italic">Неверный логин или пароль</p>
+            {% endif %}
+
+            <button type="submit" class="m3-btn-primary w-full justify-center py-4 text-lg mt-4 shadow-lg">
+                Войти в систему
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
