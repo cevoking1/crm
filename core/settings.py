@@ -100,3 +100,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'order_list'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
+
+# Telegram Settings (Замени на свои данные)
+TELEGRAM_BOT_TOKEN = '8514173753:AAHkczBcRi8NGGCJEDNlbyMEoM1DGObrwr4'
+TELEGRAM_CHAT_ID = '@greszharnamabot'

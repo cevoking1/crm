@@ -14,4 +14,5 @@ urlpatterns = [
     path('order/<int:pk>/edit/', views.order_update, name='order_edit'), # РЕДАКТИРОВАНИЕ
     path('status/<int:order_id>/<str:new_status>/', views.update_order_status, name='update_status'),
     path('item/<int:item_id>/defect/', views.mark_item_defect, name='mark_defect'),
+    path('warehouse/', views.warehouse_list, name='warehouse'),
 ]
