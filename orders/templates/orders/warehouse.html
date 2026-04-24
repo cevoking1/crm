@@ -10,12 +10,14 @@
         </div>
         
         <div class="flex gap-3">
-            <a href="/admin/orders/material/" class="m3-btn-tonal flex items-center gap-2 py-3 px-6 shadow-sm">
+            {% if user.is_superuser or perms.orders.add_material %}
+            <a href="{% url 'material_add' %}" class="m3-btn-tonal flex items-center gap-2 py-3 px-6 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
-                Пополнить склад
+                Добавить материал
             </a>
+            {% endif %}
         </div>
     </header>
 
@@ -81,7 +83,7 @@
         </div>
         {% empty %}
         <div class="col-span-full py-20 text-center surface bg-white border-dashed">
-            <p class="text-slate-500 italic">Склад пуст. Добавьте материалы в панели управления.</p>
+            <p class="text-slate-500 italic">Склад пуст. Добавьте материалы выше.</p>
         </div>
         {% endfor %}
     </div>
@@ -93,12 +95,13 @@
             </svg>
         </div>
         <p class="text-sm text-blue-800 leading-relaxed">
-            <b>Логика списания:</b> Для рулонных материалов система автоматически вычитает <b>высоту изделия</b> помноженную на <b>количество</b> из остатка рулона.
+            <b>Логика списания:</b> Для рулонных материалов система автоматически вычитает <b>высоту изделия</b> помноженную на <b>количество</b> из остатка рулона при переводе заказа в статус «В работе».
         </p>
     </div>
 </div>
 
 <script>
+    // Скрипт для динамического заполнения прогресс-бара
     document.querySelectorAll('.js-progress-bar').forEach(bar => {
         const width = Math.min(bar.getAttribute('data-width'), 100);
         bar.style.width = width + '%';

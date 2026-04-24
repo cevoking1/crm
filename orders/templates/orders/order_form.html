@@ -16,9 +16,7 @@
         <h1 class="text-4xl font-light text-[#1a1b1f]">
             {% if is_edit %}Редактирование заказа{% else %}Новое задание{% endif %}
         </h1>
-        <p class="text-[#44474e] mt-2 italic">
-            {% if is_edit %}Измените необходимые параметры заказа клиента{% else %}Введите данные клиента и параметры печати для расчета{% endif %}
-        </p>
+        <p class="text-[#44474e] mt-2 italic">Введите данные клиента и выберите материалы со склада</p>
     </header>
 
     <form method="post" class="space-y-8 pb-20">
@@ -27,10 +25,10 @@
         <div class="surface p-8 bg-white border-[#e1e2ec]">
             <div class="flex items-center gap-3 mb-6 border-b border-slate-50 pb-2">
                 <div class="w-2 h-6 bg-[#005ac1] rounded-full"></div>
-                <h2 class="text-xs font-bold text-[#005ac1] uppercase tracking-widest">Основная информация</h2>
+                <h2 class="text-sm font-bold text-[#005ac1] uppercase tracking-widest">Информация о клиенте</h2>
             </div>
             <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">ФИО Клиента или Компания</label>
+                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">ФИО Клиента или Название компании</label>
                 {{ form.client_name }}
                 {% if form.client_name.errors %}
                     <p class="text-red-500 text-[10px] mt-1 ml-4 italic font-bold uppercase">{{ form.client_name.errors }}</p>
@@ -40,9 +38,9 @@
 
         <div class="space-y-6">
             <div class="flex items-center justify-between px-4">
-                <h3 class="text-lg font-medium text-[#1a1b1f] uppercase tracking-tighter">Позиции заказа</h3>
-                <span class="text-[10px] font-mono text-[#74777f] bg-white px-4 py-1.5 rounded-full border border-[#e1e2ec] uppercase tracking-widest shadow-sm">
-                    Всего форм: {{ formset.total_form_count }}
+                <h3 class="text-lg font-medium text-[#1a1b1f] uppercase tracking-tighter">Позиции для печати</h3>
+                <span class="text-[10px] font-mono text-[#74777f] bg-white px-4 py-1.5 rounded-full border border-[#e1e2ec] uppercase shadow-sm">
+                    Строк: {{ formset.total_form_count }}
                 </span>
             </div>
 
@@ -56,34 +54,34 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
                     <div class="md:col-span-5 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Тип печати / Услуга</label>
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Тип услуги</label>
                         {{ item_form.product }}
                     </div>
 
                     <div class="md:col-span-7 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Ширина рулона (Материал)</label>
-                        {{ item_form.material_width }}
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Материал (Склад)</label>
+                        {{ item_form.material }}
                     </div>
 
                     <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Ширина (метры)</label>
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Ширина (м)</label>
                         {{ item_form.width }}
                     </div>
                     
                     <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Высота (метры)</label>
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Высота (м)</label>
                         {{ item_form.height }}
                     </div>
 
                     <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Количество (шт)</label>
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Кол-во (шт)</label>
                         {{ item_form.quantity }}
                     </div>
                 </div>
 
                 {% if formset.can_delete %}
-                    <div class="mt-6 flex items-center justify-end gap-2 text-[#74777f] opacity-40 hover:opacity-100 transition-opacity">
-                        <label class="text-[10px] font-bold uppercase tracking-tighter">Удалить позицию</label>
+                    <div class="mt-6 flex items-center justify-end gap-2 text-[#74777f] opacity-30 hover:opacity-100 transition-opacity">
+                        <label class="text-[10px] font-bold uppercase tracking-tighter">Удалить из списка</label>
                         {{ item_form.DELETE }}
                     </div>
                 {% endif %}
@@ -92,7 +90,9 @@
                 
                 {% if item_form.errors %}
                     <div class="mt-6 p-4 bg-red-50 rounded-2xl border-2 border-red-100 border-dashed">
-                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-widest">Ошибка в заполнении размеров или выбора товара</p>
+                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-widest leading-tight">
+                            Ошибка: Проверьте размеры и выбор товара.
+                        </p>
                     </div>
                 {% endif %}
             </div>
@@ -104,25 +104,24 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-hover:-translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                Отмена операции
+                Отмена
             </a>
             
             <button type="submit" class="m3-btn-primary w-full md:w-auto px-16 py-5 text-xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">
-                {% if is_edit %}Сохранить изменения{% else %}Запустить в работу{% endif %}
+                {% if is_edit %}Сохранить изменения{% else %}Запустить в производство{% endif %}
             </button>
         </div>
     </form>
 </div>
 
 <style>
-    /* Переопределение стилей инпутов Django для Material 3 */
+    /* Кастомная стилизация для инпутов в стиле Material 3 */
     select, input[type="text"], input[type="number"] {
         @apply m3-input !bg-[#f0f0f3] border-none focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800;
     }
     input::placeholder {
         @apply text-slate-400 font-normal italic;
     }
-    /* Стилизация чекбоксов удаления */
     input[type="checkbox"] {
         @apply w-5 h-5 rounded-md border-[#e1e2ec] text-[#005ac1] focus:ring-[#005ac1];
     }

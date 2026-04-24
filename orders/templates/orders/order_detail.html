@@ -3,7 +3,7 @@
 <div class="max-w-5xl mx-auto">
     <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
         <div class="flex items-center gap-6">
-            <a href="{% url 'order_list' %}" class="w-12 h-12 flex items-center justify-center rounded-full bg-[#f0f0f3] hover:bg-[#e1e2ec] transition-colors shadow-sm" title="Назад к списку">
+            <a href="{% url 'order_list' %}" class="w-12 h-12 flex items-center justify-center rounded-full bg-[#f0f0f3] hover:bg-[#e1e2ec] transition-colors shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#44474e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -14,56 +14,41 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto">
-            <a href="{% url 'order_edit' order.id %}" class="m3-btn-tonal flex items-center gap-2 px-6 py-3 w-full md:w-auto justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Изменить параметры
-            </a>
-        </div>
+        <a href="{% url 'order_edit' order.id %}" class="m3-btn-tonal flex items-center gap-2 px-6 py-3 justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Изменить
+        </a>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 space-y-6">
             <div class="surface p-8 bg-white border-[#e1e2ec]">
-                <div class="flex justify-between items-center mb-8 border-b border-slate-50 pb-4">
-                    <div class="flex items-center gap-2 text-[#005ac1]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" /></svg>
-                        <h3 class="font-bold uppercase text-xs tracking-[0.2em]">Техническое задание</h3>
-                    </div>
-                    <span class="text-[10px] text-[#74777f] font-mono bg-slate-100 px-3 py-1 rounded-full italic uppercase">
-                        Позиций: {{ order.items.count }}
-                    </span>
-                </div>
+                <h3 class="text-[#005ac1] font-bold uppercase text-xs tracking-[0.2em] mb-8">Техническое задание</h3>
 
                 <div class="divide-y divide-[#e1e2ec]">
                     {% for item in order.items.all %}
-                    <div class="py-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 {% if item.is_defective %}bg-red-50/50 -mx-4 px-4 rounded-[28px]{% endif %} transition-all duration-300">
+                    <div class="py-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 {% if item.is_defective %}bg-red-50/50 -mx-4 px-4 rounded-[28px]{% endif %} transition-all">
                         <div class="space-y-2">
                             <div class="flex items-center gap-3">
                                 <p class="font-bold text-2xl text-[#1a1b1f]">{{ item.product.name }}</p>
                                 {% if item.is_defective %}
-                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">Брак</span>
+                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Брак</span>
                                 {% endif %}
                             </div>
                             <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#44474e]">
-                                <p class="bg-slate-50 px-2 py-1 rounded">Размер: <span class="font-bold text-[#1a1b1f]">{{ item.width }} x {{ item.height }} м.</span></p>
-                                <p class="bg-slate-50 px-2 py-1 rounded">Материал: <span class="font-medium italic text-[#005ac1]">{{ item.get_material_width_display }}</span></p>
+                                <p class="bg-slate-50 px-2 py-1 rounded">Размер: <b>{{ item.width }} x {{ item.height }} м.</b></p>
+                                <p class="bg-slate-50 px-2 py-1 rounded">Материал: <span class="italic text-[#005ac1]">{{ item.material.name|default:"Не указан" }}</span></p>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-8 self-end md:self-center">
                             <div class="text-right">
-                                <p class="text-3xl font-light text-[#1a1b1f] tracking-tighter">x{{ item.quantity }} <span class="text-xs text-[#74777f]">шт.</span></p>
-                                <p class="text-[10px] text-[#74777f] font-mono mt-1 italic">Площадь: {{ item.area|floatformat:2 }} м²</p>
+                                <p class="text-3xl font-light text-[#1a1b1f]">x{{ item.quantity }}</p>
+                                <p class="text-[10px] text-[#74777f] font-mono mt-1">S = {{ item.area|floatformat:2 }} м²</p>
                             </div>
-                            
-                            <a href="{% url 'mark_defect' item.id %}"
-                               class="w-12 h-12 flex items-center justify-center rounded-2xl transition-all shadow-sm
-                               {% if item.is_defective %} bg-red-600 text-white hover:bg-red-700 active:scale-95 shadow-red-200 
-                               {% else %} bg-[#f0f0f3] text-[#74777f] hover:bg-red-50 hover:text-red-600 {% endif %}"
-                               title="Переключить статус брака">
+                            <a href="{% url 'mark_defect' item.id %}" class="w-12 h-12 flex items-center justify-center rounded-2xl transition-all {% if item.is_defective %} bg-red-600 text-white shadow-md {% else %} bg-[#f0f0f3] text-[#74777f] hover:bg-red-50 hover:text-red-600 {% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
@@ -75,64 +60,55 @@
             </div>
             
             <div class="px-8 py-5 bg-[#fdfcff] border-2 border-dashed border-[#e1e2ec] rounded-[28px] flex justify-between items-center text-sm">
-                <span class="text-[#44474e] font-medium uppercase tracking-widest text-[10px]">Общий расход материала (м²)</span>
+                <span class="text-[#44474e] uppercase tracking-widest text-[10px]">Общий расход:</span>
                 <p class="font-bold text-2xl text-[#1a1b1f] tracking-tighter">{{ order.total_area|floatformat:3 }} м²</p>
             </div>
         </div>
 
         <div class="space-y-6">
-            <div class="surface p-8 bg-[#f0f0f3] border-none shadow-inner relative overflow-hidden text-center md:text-left">
+            <div class="surface p-8 bg-[#f0f0f3] border-none shadow-inner">
                 <div class="mb-10">
-                    <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-3">Состояние</p>
-                    <div class="flex items-center gap-4 justify-center md:justify-start">
-                        <div class="w-4 h-4 rounded-full shadow-sm
-                            {% if order.status == 'new' %} bg-blue-500 ring-4 ring-blue-100
-                            {% elif order.status == 'in_progress' %} bg-amber-500 animate-pulse ring-4 ring-amber-100
-                            {% elif order.status == 'ready' %} bg-green-500 ring-4 ring-green-100
+                    <p class="text-[10px] font-bold text-[#44474e] uppercase mb-3 tracking-widest">Состояние заказа</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-4 h-4 rounded-full 
+                            {% if order.status == 'new' %} bg-blue-500
+                            {% elif order.status == 'in_progress' %} bg-amber-500 animate-pulse
+                            {% elif order.status == 'ready' %} bg-green-500
                             {% elif order.status == 'issued' %} bg-slate-400
-                            {% endif %}">
-                        </div>
+                            {% endif %}"></div>
                         <span class="text-2xl font-medium text-[#1a1b1f]">{{ order.get_status_display }}</span>
                     </div>
                 </div>
 
                 <div>
-                    <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-1">Сумма к получению</p>
+                    <p class="text-[10px] font-bold text-[#44474e] uppercase mb-1 tracking-widest">К оплате</p>
                     <p class="text-5xl font-bold text-[#005ac1] tracking-tighter">{{ order.total_amount|floatformat:0|intcomma }} <span class="text-xl font-light italic">₸</span></p>
-                    {% if order.total_amount == 0 and order.items.count > 0 %}
-                        <p class="text-[10px] text-red-600 mt-4 italic font-bold leading-tight">Внимание! Итог 0 ₸ из-за брака во всех позициях.</p>
-                    {% endif %}
                 </div>
             </div>
 
             <div class="surface p-6 space-y-4 bg-white">
-                <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-4 text-center">Контроль производства</p>
-                
                 {% if order.status == 'new' %}
                     <a href="{% url 'update_status' order.id 'in_progress' %}" class="m3-btn-primary w-full justify-center py-4 text-lg">Принять в работу</a>
                 {% elif order.status == 'in_progress' %}
-                    <a href="{% url 'update_status' order.id 'ready' %}" class="m3-btn-primary bg-[#c2eed0] text-[#00210b] hover:bg-[#afe5bf] shadow-none w-full justify-center py-4 text-lg">Завершить печать</a>
+                    <a href="{% url 'update_status' order.id 'ready' %}" class="m3-btn-primary bg-[#c2eed0] text-[#00210b] hover:bg-[#afe5bf] w-full justify-center py-4 text-lg">Завершить печать</a>
                 {% elif order.status == 'ready' %}
-                    <a href="{% url 'update_status' order.id 'issued' %}" class="m3-btn-tonal w-full justify-center py-4 border-2 border-[#005ac1] text-[#005ac1] hover:bg-blue-50 shadow-sm">Выдать заказ</a>
+                    <a href="{% url 'update_status' order.id 'issued' %}" class="m3-btn-tonal w-full justify-center py-4 border-2 border-[#005ac1] text-[#005ac1] hover:bg-blue-50 shadow-sm">Выдать клиенту</a>
                 {% endif %}
 
-                {% if order.status != 'issued' %}
-                    <button onclick="window.print()" class="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-[#44474e] hover:text-[#005ac1] transition-all uppercase tracking-tighter opacity-60 hover:opacity-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                        Распечатать ТЗ (Ctrl+P)
-                    </button>
-                {% endif %}
+                <button onclick="window.print()" class="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-[#44474e] hover:text-[#005ac1] transition-all uppercase tracking-widest opacity-60">
+                    Распечатать ТЗ
+                </button>
             </div>
             
             <div class="px-8 text-center space-y-1">
-                <p class="text-[9px] text-[#74777f] uppercase font-bold tracking-widest">Информация о регистрации</p>
+                <p class="text-[9px] text-[#74777f] uppercase font-bold tracking-widest">Регистрация</p>
                 <p class="text-[10px] text-[#74777f] italic leading-relaxed">
                     Создан: {{ order.created_at|date:"d E Y, H:i" }}<br>
                     Менеджер: 
                     {% if order.created_by %}
                         {{ order.created_by.get_full_name|default:order.created_by.username }}
                     {% else %}
-                        <span class="text-slate-400">Не указан</span>
+                        Не указан
                     {% endif %}
                 </p>
             </div>
@@ -142,14 +118,10 @@
 
 <style>
     @media print {
-        nav, .m3-btn-primary, .m3-btn-tonal, .w-12, a[href*="defect"], .fixed {
-            display: none !important;
-        }
+        nav, .m3-btn-primary, .m3-btn-tonal, .w-12, a[href*="defect"], .fixed { display: none !important; }
         body { background: white !important; }
         .surface { border: 1px solid #eee !important; box-shadow: none !important; border-radius: 0 !important; }
-        .max-w-5xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
-        h1 { font-size: 24pt !important; font-weight: bold !important; }
-        .text-4xl { font-size: 20pt !important; }
+        .max-w-5xl { max-width: 100% !important; margin: 0 !important; }
     }
 </style>
 {% endblock %}

@@ -1,10 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
-import requests
 
 class Material(models.Model):
-    """Склад рулонных и штучных материалов"""
+    """Склад: рулоны (пог.м.) или штучный товар"""
     TYPE_CHOICES = [
         ('roll', 'Рулон (погонные метры)'),
         ('unit', 'Штучный товар'),
@@ -12,13 +11,12 @@ class Material(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название материала")
     material_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='roll', verbose_name="Тип")
     width = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, verbose_name="Ширина рулона (м)")
-    total_length = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Остаток (м/шт)")
+    total_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Остаток (м/шт)")
     min_stock = models.DecimalField(max_digits=10, decimal_places=2, default=5.00, verbose_name="Критический остаток")
 
     def __str__(self):
-        if self.material_type == 'roll':
-            return f"{self.name} ({self.width}м) — ост. {self.total_length}м"
-        return f"{self.name} — ост. {self.total_length}шт"
+        unit = "м" if self.material_type == 'roll' else "шт"
+        return f"{self.name} ({self.width}м) — ост. {self.total_stock}{unit}"
 
     class Meta:
         verbose_name = "Материал"
@@ -57,10 +55,12 @@ class Order(models.Model):
 
     @property
     def total_amount(self):
+        """Сумма всего заказа"""
         return sum(item.total_price for item in self.items.all())
 
     @property
     def total_area(self):
+        """Общая площадь печати"""
         return sum(item.area * item.quantity for item in self.items.all())
 
     class Meta:
@@ -71,7 +71,7 @@ class OrderItem(models.Model):
     """Позиции заказа"""
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name="Товар")
-    material = models.ForeignKey(Material, on_delete=models.SET_NULL, null=True, verbose_name="Материал")
+    material = models.ForeignKey(Material, on_delete=models.SET_NULL, null=True, verbose_name="Материал со склада")
     
     width = models.DecimalField(max_digits=10, decimal_places=3, default=0, verbose_name="Ширина (м)")
     height = models.DecimalField(max_digits=10, decimal_places=3, default=0, verbose_name="Высота (м)")
@@ -92,13 +92,13 @@ class OrderItem(models.Model):
             return self.area * self.product.price * self.quantity
         return self.product.price * self.quantity
 
-    def deduct_from_stock(self):
-        """Логика списания: если это рулон, списываем ВЫСОТУ (погонные метры)"""
+    def deduct_stock(self):
+        """Списание материала при запуске в печать или перепечатке брака"""
         if self.material and not self.is_deducted:
-            # Списываем погонные метры (высоту изделия)
-            consumption = self.height * self.quantity
-            if self.material.total_length >= consumption:
-                self.material.total_length -= consumption
+            # Для рулонов списываем высоту (погонные метры), для штук — количество
+            consumption = self.height * self.quantity if self.material.material_type == 'roll' else self.quantity
+            if self.material.total_stock >= consumption:
+                self.material.total_stock -= consumption
                 self.material.save()
                 self.is_deducted = True
                 self.save()
