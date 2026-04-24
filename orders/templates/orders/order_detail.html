@@ -1,57 +1,123 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{% url 'order_list' %}" class="m3-btn-tonal p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+<div class="max-w-5xl mx-auto">
+    <header class="flex items-center gap-6 mb-10">
+        <a href="{% url 'order_list' %}" class="w-12 h-12 flex items-center justify-center rounded-full bg-[#f0f0f3] hover:bg-[#e1e2ec] transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#44474e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
         </a>
-        <h1 class="text-3xl font-light">Заказ №{{ order.id }}</h1>
-    </div>
+        <div>
+            <h1 class="text-3xl font-light text-[#1a1b1f]">Заказ №{{ order.id }}</h1>
+            <p class="text-[#74777f] font-medium italic">{{ order.client_name }}</p>
+        </div>
+    </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="md:col-span-2 space-y-6">
-            <div class="surface p-6">
-                <h3 class="text-[#005ac1] font-medium mb-4 uppercase text-xs tracking-widest">Техническое задание</h3>
-                <div class="divide-y divide-slate-100">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="surface p-8 bg-white border-[#e1e2ec]">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[#005ac1] font-bold uppercase text-xs tracking-[0.2em]">Техническое задание</h3>
+                    <span class="text-xs text-[#74777f] bg-slate-100 px-3 py-1 rounded-full italic">
+                        Всего позиций: {{ order.items.count }}
+                    </span>
+                </div>
+
+                <div class="divide-y divide-[#e1e2ec]">
                     {% for item in order.items.all %}
-                    <div class="py-4 flex justify-between items-center {% if item.is_defective %}opacity-50{% endif %}">
-                        <div>
-                            <p class="font-bold text-lg">{{ item.product.name }}</p>
-                            <p class="text-sm text-slate-500">
-                                Размеры: <span class="text-slate-900 font-medium">{{ item.width }} x {{ item.height }} м.</span> 
-                                | Рулон: {{ item.get_material_width_display }}
-                            </p>
+                    <div class="py-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 {% if item.is_defective %}bg-red-50/50 -mx-4 px-4 rounded-xl{% endif %} transition-colors">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-3">
+                                <p class="font-bold text-xl text-[#1a1b1f]">{{ item.product.name }}</p>
+                                {% if item.is_defective %}
+                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter">Брак / Перепечатка</span>
+                                {% endif %}
+                            </div>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#44474e]">
+                                <p>Размер: <span class="font-bold text-[#1a1b1f]">{{ item.width }} x {{ item.height }} м.</span></p>
+                                <p>Материал: <span class="font-medium italic underline decoration-slate-300 underline-offset-2">{{ item.get_material_width_display }}</span></p>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <p class="font-medium italic">x{{ item.quantity }} шт.</p>
-                            {% if not item.is_defective and order.status != 'ready' %}
-                                <a href="{% url 'mark_defect' item.id %}" class="text-red-500 text-xs font-bold uppercase hover:bg-red-50 p-2 rounded-lg">Брак</a>
-                            {% elif item.is_defective %}
-                                <span class="text-red-600 font-bold text-xs uppercase">Перепечатка</span>
-                            {% endif %}
+
+                        <div class="flex items-center gap-6 self-end md:self-center">
+                            <div class="text-right">
+                                <p class="text-2xl font-light text-[#1a1b1f]">x{{ item.quantity }} <span class="text-xs text-[#74777f]">шт.</span></p>
+                                <p class="text-[10px] text-[#74777f] font-mono italic">S = {{ item.area|floatformat:2 }} м²</p>
+                            </div>
+                            
+                            <a href="{% url 'mark_defect' item.id %}" 
+                               class="w-10 h-10 flex items-center justify-center rounded-full transition-all 
+                               {% if item.is_defective %} bg-red-600 text-white shadow-md {% else %} bg-[#f0f0f3] text-[#74777f] hover:bg-red-50 hover:text-red-600 {% endif %}"
+                               title="Отметить как брак">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
+            
+            <div class="px-8 py-4 bg-[#fdfcff] border border-dashed border-[#e1e2ec] rounded-[28px] flex justify-between items-center text-sm text-[#44474e]">
+                <p>Общая площадь заказа:</p>
+                <p class="font-bold text-[#1a1b1f]">{{ order.total_area|floatformat:3 }} м²</p>
+            </div>
         </div>
 
         <div class="space-y-6">
-            <div class="surface p-6 bg-[#f0f0f3]">
-                <p class="text-xs font-bold text-slate-500 uppercase">Статус</p>
-                <p class="text-xl font-medium mt-1">{{ order.get_status_display }}</p>
+            <div class="surface p-8 bg-[#f0f0f3] border-none">
+                <div class="mb-8">
+                    <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-2">Текущий этап</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 rounded-full 
+                            {% if order.status == 'new' %} bg-blue-500 
+                            {% elif order.status == 'in_progress' %} bg-amber-500 animate-pulse
+                            {% elif order.status == 'ready' %} bg-green-500 
+                            {% endif %}">
+                        </div>
+                        <span class="text-xl font-medium text-[#1a1b1f]">{{ order.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-1">Итого к оплате</p>
+                    <p class="text-4xl font-bold text-[#005ac1] tracking-tighter">{{ order.total_amount }} <span class="text-lg font-normal italic">₸</span></p>
+                    {% if order.total_amount == 0 and order.items.count > 0 %}
+                        <p class="text-[10px] text-red-500 mt-2 italic font-medium">! Сумма 0, так как все позиции в браке</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="surface p-6 space-y-3">
+                <p class="text-[10px] font-bold text-[#44474e] uppercase tracking-[0.2em] mb-4 text-center">Управление производством</p>
                 
-                <p class="text-xs font-bold text-slate-500 uppercase mt-6">Сумма к оплате</p>
-                <p class="text-3xl font-bold text-[#005ac1]">{{ order.total_amount }} ₸</p>
+                {% if order.status == 'new' %}
+                    <a href="{% url 'update_status' order.id 'in_progress' %}" class="m3-btn-primary w-full justify-center py-4">
+                        Принять в работу
+                    </a>
+                {% elif order.status == 'in_progress' %}
+                    <a href="{% url 'update_status' order.id 'ready' %}" class="m3-btn-primary bg-[#c2eed0] text-[#00210b] hover:bg-[#afe5bf] shadow-none w-full justify-center py-4">
+                        Завершить печать
+                    </a>
+                {% elif order.status == 'ready' %}
+                    <a href="{% url 'update_status' order.id 'issued' %}" class="m3-btn-tonal w-full justify-center py-4 border-2 border-[#005ac1] text-[#005ac1]">
+                        Выдать клиенту
+                    </a>
+                {% endif %}
+
+                {% if order.status != 'issued' %}
+                    <button onclick="window.print()" class="w-full text-xs font-medium text-[#44474e] hover:text-[#005ac1] pt-2 transition-colors">
+                        Напечатать ТЗ (Ctrl+P)
+                    </button>
+                {% endif %}
             </div>
             
-            <div class="surface p-6">
-                <p class="text-xs font-bold text-slate-500 uppercase mb-4">Действия</p>
-                {% if order.status == 'new' %}
-                    <a href="{% url 'update_status' order.id 'in_progress' %}" class="m3-btn-primary w-full justify-center">В работу</a>
-                {% elif order.status == 'in_progress' %}
-                    <a href="{% url 'update_status' order.id 'ready' %}" class="m3-btn-primary bg-[#c2eed0] text-[#00210b] w-full justify-center shadow-none hover:bg-[#afe5bf]">Готов</a>
-                {% endif %}
+            <div class="px-6 text-center">
+                <p class="text-[10px] text-[#74777f] italic">
+                    Заказ создан: {{ order.created_at|date:"d E Y, H:i" }}<br>
+                    Ответственный: {{ order.created_by.get_full_name|default:order.created_by.username }}
+                </p>
             </div>
         </div>
     </div>

@@ -1,63 +1,108 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-3xl mx-auto">
+<div class="max-w-4xl mx-auto">
     <header class="mb-10 text-center">
-        <h1 class="text-4xl font-light">Новый заказ</h1>
-        <p class="text-[#44474e] mt-2">Заполните данные для расчета стоимости</p>
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-[#d3e4ff] text-[#001c3b] rounded-2xl mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        </div>
+        <h1 class="text-4xl font-light text-[#1a1b1f]">Новое задание</h1>
+        <p class="text-[#44474e] mt-2">Введите данные клиента и параметры печати для автоматического расчета</p>
     </header>
 
-    <form method="post" class="space-y-8">
+    <form method="post" class="space-y-8 pb-20">
         {% csrf_token %}
         
-        <div class="surface p-8 space-y-4">
-            <label class="text-sm font-medium text-[#005ac1]">Основная информация</label>
-            <input type="text" name="client_name" placeholder="Имя клиента или компания" 
-                   class="m3-input text-xl" required>
+        <div class="surface p-8 bg-white border-[#e1e2ec]">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-2 h-6 bg-[#005ac1] rounded-full"></div>
+                <h2 class="text-sm font-bold text-[#005ac1] uppercase tracking-widest">Основная информация</h2>
+            </div>
+            <div class="space-y-2">
+                <label class="text-xs font-medium text-[#44474e] ml-4 italic">ФИО Клиента или Компания</label>
+                {{ form.client_name }}
+                {% if form.client_name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ form.client_name.errors }}</p>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="space-y-4">
-            <h3 class="text-lg font-medium px-4 text-[#44474e]">Позиции печати</h3>
+        <div class="space-y-6">
+            <div class="flex items-center justify-between px-4">
+                <h3 class="text-lg font-medium text-[#1a1b1f]">Позиции заказа</h3>
+                <span class="text-xs font-mono text-[#74777f] bg-white px-3 py-1 rounded-full border border-[#e1e2ec]">
+                    Доступно строк: {{ formset.total_form_count }}
+                </span>
+            </div>
+
             {{ formset.management_form }}
+            
             {% for item_form in formset %}
-            <div class="surface p-6 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                <div class="space-y-2 col-span-2 md:col-span-1">
-                    <label class="text-xs font-bold text-[#74777f] uppercase">Тип товара</label>
-                    <div class="relative">{{ item_form.product }}</div>
+            <div class="surface p-8 bg-white border-[#e1e2ec] relative transition-all hover:shadow-md group">
+                <div class="absolute -left-3 top-8 w-8 h-8 bg-[#f0f0f3] text-[#74777f] rounded-full flex items-center justify-center text-xs font-bold border-4 border-[#f8f9ff]">
+                    {{ forloop.counter }}
                 </div>
-                <div class="grid grid-cols-2 gap-4 col-span-2 md:col-span-1">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-[#74777f] uppercase">Ширина (м)</label>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <div class="md:col-span-5 space-y-2">
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-wider ml-1">Услуга / Тип печати</label>
+                        {{ item_form.product }}
+                    </div>
+
+                    <div class="md:col-span-7 space-y-2">
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-wider ml-1">Ширина рулона (Материал)</label>
+                        {{ item_form.material_width }}
+                    </div>
+
+                    <div class="md:col-span-4 space-y-2">
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-wider ml-1">Ширина (метры)</label>
                         {{ item_form.width }}
                     </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-[#74777f] uppercase">Высота (м)</label>
+                    <div class="md:col-span-4 space-y-2">
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-wider ml-1">Высота (метры)</label>
                         {{ item_form.height }}
                     </div>
-                </div>
-                <div class="col-span-2 flex items-center justify-between pt-4 border-t border-dashed border-[#e1e2ec]">
-                    <div class="flex items-center gap-2 text-sm">
-                        <span>Количество:</span>
+                    <div class="md:col-span-4 space-y-2">
+                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-wider ml-1">Количество (шт)</label>
                         {{ item_form.quantity }}
                     </div>
-                    <span class="text-xs text-[#74777f]">Позиция #{{ forloop.counter }}</span>
                 </div>
+
                 {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                
+                {% if item_form.errors %}
+                    <div class="mt-4 p-3 bg-red-50 rounded-xl border border-red-100">
+                        <p class="text-xs text-red-600 font-medium">Проверьте правильность введенных размеров</p>
+                    </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
 
-        <div class="flex items-center justify-between pt-6">
-            <a href="{% url 'order_list' %}" class="text-[#44474e] hover:underline font-medium">Назад к списку</a>
-            <button type="submit" class="m3-btn-primary scale-110 shadow-xl">
-                Сохранить и запустить
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-[#e1e2ec]">
+            <a href="{% url 'order_list' %}" class="text-sm font-medium text-[#44474e] hover:text-[#1a1b1f] flex items-center gap-2 group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                Отмена и возврат
+            </a>
+            
+            <button type="submit" class="m3-btn-primary w-full md:w-auto px-12 py-4 text-lg shadow-2xl active:scale-95 transition-transform">
+                Запустить в производство
             </button>
         </div>
     </form>
 </div>
 
 <style>
-    /* Хак для стилизации Django инпутов внутри Tailwind */
-    select, input[type="number"] { @apply m3-input py-2; }
-    .surface { border-width: 1px !important; }
+    /* Переопределяем стандартные стили Django-форм под Material 3 */
+    select, input[type="text"], input[type="number"] {
+        @apply m3-input !bg-[#f0f0f3] border-none focus:ring-2 focus:ring-[#005ac1] transition-all;
+    }
+    input::placeholder {
+        @apply text-slate-400 font-normal;
+    }
+    .surface {
+        border-width: 1px !important;
+    }
 </style>
 {% endblock %}
