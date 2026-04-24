@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<header class="mb-10 flex justify-between items-center">
+    <div>
+        <h1 class="text-4xl font-light text-[#1a1b1f]">Ваши задачи</h1>
+        <p class="text-[#44474e] mt-2">Локальная сеть: <span class="font-mono bg-blue-50 px-2 py-1 rounded">192.168.0.111</span></p>
+    </div>
+    <a href="{% url 'order_create' %}" class="m3-btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+        Создать
+    </a>
+</header>
+
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+    <div class="surface p-8 bg-[#d3e4ff]">
+        <p class="text-sm font-medium text-[#001c3b] uppercase">Касса сегодня</p>
+        <p class="text-5xl font-bold mt-2 text-[#001c3b]">{{ total_today|default:"0" }} <span class="text-xl font-normal">₸</span></p>
+    </div>
+    <div class="surface p-8">
+        <p class="text-sm font-medium text-[#44474e] uppercase">В производстве</p>
+        <p class="text-5xl font-bold mt-2">{{ count_in_progress|default:"0" }}</p>
+    </div>
+</section>
+
+<div class="surface overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="text-[#44474e] text-sm border-b border-[#e1e2ec]">
+                    <th class="px-8 py-5 font-medium">Клиент</th>
+                    <th class="px-6 py-5 font-medium">Статус</th>
+                    <th class="px-6 py-5 font-medium">Сумма</th>
+                    <th class="px-8 py-5 text-right">Действие</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#e1e2ec]">
+                {% for o in orders %}
+                <tr class="hover:bg-[#f1f0f4] transition-colors">
+                    <td class="px-8 py-6">
+                        <p class="font-bold text-[#1a1b1f]">{{ o.client_name }}</p>
+                        <p class="text-xs text-[#74777f] mt-1 italic">Создан {{ o.created_at|date:"H:i" }}</p>
+                    </td>
+                    <td class="px-6 py-6">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-medium 
+                            {% if o.status == 'new' %} bg-[#e1e2ec] text-[#1a1b1f]
+                            {% elif o.status == 'in_progress' %} bg-[#ffd946] text-[#241a00]
+                            {% elif o.status == 'ready' %} bg-[#c2eed0] text-[#00210b]
+                            {% endif %}">
+                            {{ o.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-6 font-medium text-lg">{{ o.total_amount }} ₸</td>
+                    <td class="px-8 py-6 text-right">
+                        {% if o.status == 'new' %}
+                            <a href="{% url 'update_status' o.id 'in_progress' %}" class="m3-btn-tonal text-sm">В работу</a>
+                        {% elif o.status == 'in_progress' %}
+                            <a href="{% url 'update_status' o.id 'ready' %}" class="m3-btn-tonal bg-[#c2eed0] text-[#00210b] text-sm">Готово</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

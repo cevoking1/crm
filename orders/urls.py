@@ -1,0 +1,10 @@
+from django.urls import path
+from . import views  # ОБЯЗАТЕЛЬНО проверь эту строку
+
+urlpatterns = [
+    path('', views.order_list, name='order_list'),
+    path('create/', views.order_create, name='order_create'),
+    path('order/<int:pk>/', views.order_detail, name='order_detail'),
+    path('status/<int:order_id>/<str:new_status>/', views.update_order_status, name='update_status'),
+    path('item/<int:item_id>/defect/', views.mark_item_defect, name='mark_defect'),
+]

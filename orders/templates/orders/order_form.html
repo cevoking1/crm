@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <header class="mb-10 text-center">
+        <h1 class="text-4xl font-light">Новый заказ</h1>
+        <p class="text-[#44474e] mt-2">Заполните данные для расчета стоимости</p>
+    </header>
+
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+        
+        <div class="surface p-8 space-y-4">
+            <label class="text-sm font-medium text-[#005ac1]">Основная информация</label>
+            <input type="text" name="client_name" placeholder="Имя клиента или компания" 
+                   class="m3-input text-xl" required>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium px-4 text-[#44474e]">Позиции печати</h3>
+            {{ formset.management_form }}
+            {% for item_form in formset %}
+            <div class="surface p-6 grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                <div class="space-y-2 col-span-2 md:col-span-1">
+                    <label class="text-xs font-bold text-[#74777f] uppercase">Тип товара</label>
+                    <div class="relative">{{ item_form.product }}</div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 col-span-2 md:col-span-1">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-[#74777f] uppercase">Ширина (м)</label>
+                        {{ item_form.width }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-[#74777f] uppercase">Высота (м)</label>
+                        {{ item_form.height }}
+                    </div>
+                </div>
+                <div class="col-span-2 flex items-center justify-between pt-4 border-t border-dashed border-[#e1e2ec]">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span>Количество:</span>
+                        {{ item_form.quantity }}
+                    </div>
+                    <span class="text-xs text-[#74777f]">Позиция #{{ forloop.counter }}</span>
+                </div>
+                {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex items-center justify-between pt-6">
+            <a href="{% url 'order_list' %}" class="text-[#44474e] hover:underline font-medium">Назад к списку</a>
+            <button type="submit" class="m3-btn-primary scale-110 shadow-xl">
+                Сохранить и запустить
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    /* Хак для стилизации Django инпутов внутри Tailwind */
+    select, input[type="number"] { @apply m3-input py-2; }
+    .surface { border-width: 1px !important; }
+</style>
+{% endblock %}
