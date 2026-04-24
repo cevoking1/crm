@@ -9,36 +9,54 @@
             </svg>
         </div>
         <h1 class="text-4xl font-light text-[#1a1b1f]">Добавить материал</h1>
-        <p class="text-[#44474e] mt-2 italic text-sm">Внесите данные о новом рулоне или товаре на склад</p>
+        <p class="text-[#44474e] mt-2 italic text-sm">Используйте готовые шаблоны для быстрой настройки</p>
     </header>
 
     <form method="post" class="surface p-8 bg-white space-y-6">
         {% csrf_token %}
         
-        <div class="space-y-2">
-            <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Название материала</label>
-            {{ form.name }}
+        <div class="p-6 bg-blue-50 rounded-[24px] border border-blue-100 mb-8">
+            <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest ml-4 mb-2 block italic">Шаблон для автозаполнения</label>
+            {{ form.template }}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-6">
             <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Тип</label>
-                {{ form.material_type }}
+                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Название материала</label>
+                {{ form.name }}
             </div>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Ширина рулона (м)</label>
-                {{ form.width }}
-            </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Текущий остаток</label>
-                {{ form.total_stock }}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Ширина (м)</label>
+                    {{ form.width }}
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Высота (м)</label>
+                    {{ form.height }}
+                </div>
             </div>
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Критический порог</label>
-                {{ form.min_stock }}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Тип</label>
+                    {{ form.material_type }}
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Цена закупа (за ед.)</label>
+                    {{ form.purchase_price }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Кол-во (текущий остаток)</label>
+                    {{ form.total_stock }}
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Критический порог</label>
+                    {{ form.min_stock }}
+                </div>
             </div>
         </div>
 
@@ -48,4 +66,37 @@
         </div>
     </form>
 </div>
+
+<script id="templates-data" type="application/json">
+{
+    {% for t in form.template.field.queryset %}
+    "{{ t.id }}": {
+        "name": "{{ t.name|escapejs }}",
+        "type": "{{ t.material_type }}",
+        "width": "{{ t.width|stringformat:".3f" }}",
+        "height": "{{ t.height|stringformat:".3f" }}",
+        "price": "{{ t.purchase_price|stringformat:".2f" }}"
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+}
+</script>
+
+<script>
+    const dataElement = document.getElementById('templates-data');
+    const materialTemplates = JSON.parse(dataElement.textContent);
+
+    function applyTemplate(selectElement) {
+        const templateId = selectElement.value;
+        const data = materialTemplates[templateId];
+
+        if (data) {
+            document.getElementById('id_name').value = data.name;
+            document.getElementById('id_type').value = data.type;
+            // Подставляем размеры и цену
+            document.getElementById('id_width').value = parseFloat(data.width);
+            document.getElementById('id_height').value = parseFloat(data.height);
+            document.getElementById('id_purchase_price').value = parseFloat(data.price);
+        }
+    }
+</script>
 {% endblock %}

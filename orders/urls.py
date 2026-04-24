@@ -22,4 +22,6 @@ urlpatterns = [
 
     path('warehouse/', views.warehouse_list, name='warehouse'),
     path('warehouse/add/', views.material_create, name='material_add'),
+
+    path('finance/', views.finance_report, name='finance_report'),
 ]

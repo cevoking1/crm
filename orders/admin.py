@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Product, Order, OrderItem, Material
+from .models import Product, Order, OrderItem, Material, MaterialTemplate
 
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
@@ -53,3 +54,8 @@ class OrderAdmin(admin.ModelAdmin):
         if not obj.pk:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+@admin.register(MaterialTemplate)
+class MaterialTemplateAdmin(admin.ModelAdmin):
+    list_display = ('name', 'material_type', 'width', 'purchase_price')
+    search_fields = ('name',)

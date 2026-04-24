@@ -4,11 +4,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required, permission_required
-from .models import Order, OrderItem, Material
-from .forms import OrderForm, OrderItemFormSet, MaterialForm  # Убедитесь, что MaterialForm здесь есть
+from django.views.decorators.http import require_POST
+from .models import Order, OrderItem, Material, MaterialLog, Product
+from .forms import OrderForm, OrderItemFormSet, MaterialForm
 
 def send_telegram(message):
-    """Вспомогательная функция для отправки уведомлений в Telegram"""
+    """Отправка уведомлений в Telegram бота"""
     try:
         token = settings.TELEGRAM_BOT_TOKEN
         chat_id = settings.TELEGRAM_CHAT_ID
@@ -19,31 +20,25 @@ def send_telegram(message):
 
 @login_required
 def order_list(request):
-    """Главный дашборд: список заказов и аналитика"""
+    """Главный экран: список заказов и выручка/прибыль за сегодня"""
     today = timezone.now().date()
     query = request.GET.get('q', '')
-    status_filter = request.GET.get('status', '')
-
+    
     orders = Order.objects.all().order_by('-created_at')
-
     if query:
         orders = orders.filter(Q(client_name__icontains=query))
-    if status_filter:
-        orders = orders.filter(status=status_filter)
 
+    # Финансовая сводка за текущий день
     orders_today = Order.objects.filter(created_at__date=today)
     total_today = sum(o.total_amount for o in orders_today)
-    count_in_progress = Order.objects.filter(status='in_progress').count()
-    count_defects = OrderItem.objects.filter(
-        is_defective=True, 
-        order__created_at__date=today
-    ).count()
-
+    profit_today = sum(o.total_profit for o in orders_today)
+    
     context = {
         'orders': orders,
         'total_today': total_today,
-        'count_in_progress': count_in_progress,
-        'count_defects': count_defects,
+        'profit_today': profit_today,
+        'count_in_progress': Order.objects.filter(status='in_progress').count(),
+        'count_defects': OrderItem.objects.filter(is_defective=True, order__created_at__date=today).count(),
         'query': query,
     }
     return render(request, 'orders/order_list.html', context)
@@ -51,7 +46,7 @@ def order_list(request):
 @login_required
 @permission_required('orders.add_order', raise_exception=True)
 def order_create(request):
-    """Создание заказа"""
+    """Создание нового заказа с позициями"""
     if request.method == 'POST':
         form = OrderForm(request.POST)
         formset = OrderItemFormSet(request.POST)
@@ -71,7 +66,7 @@ def order_create(request):
 @login_required
 @permission_required('orders.change_order', raise_exception=True)
 def order_update(request, pk):
-    """Редактирование заказа"""
+    """Редактирование существующего заказа"""
     order = get_object_or_404(Order, pk=pk)
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
@@ -83,63 +78,118 @@ def order_update(request, pk):
     else:
         form = OrderForm(instance=order)
         formset = OrderItemFormSet(instance=order)
-    return render(request, 'orders/order_form.html', {
-        'form': form, 
-        'formset': formset, 
-        'is_edit': True
-    })
+    return render(request, 'orders/order_form.html', {'form': form, 'formset': formset, 'is_edit': True})
 
 @login_required
 def order_detail(request, pk):
-    """Детали заказа"""
+    """Просмотр деталей заказа и ТЗ"""
     order = get_object_or_404(Order, pk=pk)
     return render(request, 'orders/order_detail.html', {'order': order})
 
 @login_required
+@require_POST
 def update_order_status(request, order_id, new_status):
-    """Смена статуса и списание материала"""
+    """Смена статуса заказа со списанием материалов при старте"""
     order = get_object_or_404(Order, id=order_id)
     if new_status in dict(Order.STATUS_CHOICES):
+        # Логика списания со склада при запуске в работу
+        if new_status == 'in_progress':
+            errors = []
+            for item in order.items.all():
+                success, msg = item.deduct_stock()
+                if not success:
+                    errors.append(msg)
+            
+            if errors:
+                # Если материалов не хватило — показываем страницу ошибки
+                return render(request, 'orders/error_page.html', {'errors': errors, 'order': order})
+            
+            send_telegram(f"🏗 Заказ №{order.id} ({order.client_name}) запущен в работу.")
+        
+        elif new_status == 'ready':
+            send_telegram(f"✅ Заказ №{order.id} ГОТОВ!")
+
         order.status = new_status
         order.save()
-        if new_status == 'in_progress':
-            for item in order.items.all():
-                item.deduct_stock()
-            send_telegram(f"🏗 Заказ №{order.id} ({order.client_name}) в работе.")
-        if new_status == 'ready':
-            send_telegram(f"✅ Заказ №{order.id} ГОТОВ!")
     return redirect(request.META.get('HTTP_REFERER', 'order_list'))
 
 @login_required
+@require_POST
 def mark_item_defect(request, item_id):
-    """Пометка брака"""
+    """Пометка брака: списывает материал повторно или возвращает его при отмене"""
     item = get_object_or_404(OrderItem, id=item_id)
     if not item.is_defective:
         item.is_defective = True
-        item.is_deducted = False 
-        item.deduct_stock()
-        send_telegram(f"⚠ БРАК! Заказ №{item.order.id}: {item.product.name}")
+        item.is_deducted = False # Сбрасываем флаг для повторного списания
+        success, msg = item.deduct_stock(is_defect_retry=True)
+        if success:
+            send_telegram(f"⚠ БРАК! Заказ №{item.order.id}: {item.product.name}. Списан материал на перепечатку.")
     else:
         item.is_defective = False
+        item.return_stock() # Возвращаем материал, если пометка брака была ошибочной
     item.save()
     return redirect(request.META.get('HTTP_REFERER', 'order_list'))
 
 @login_required
 def warehouse_list(request):
-    """Список материалов на складе"""
+    """Просмотр остатков на складе и логов последних движений"""
     materials = Material.objects.all().order_by('total_stock')
-    return render(request, 'orders/warehouse.html', {'materials': materials})
+    logs = MaterialLog.objects.all().order_by('-created_at')[:10]
+    return render(request, 'orders/warehouse.html', {'materials': materials, 'logs': logs})
 
-# ТО ЧТО ВЫ ЗАБЫЛИ ДОБАВИТЬ:
 @login_required
 @permission_required('orders.add_material', raise_exception=True)
 def material_create(request):
-    """Создание нового материала на сайте"""
+    """Добавление нового материала (поставка)"""
     if request.method == 'POST':
         form = MaterialForm(request.POST)
         if form.is_valid():
-            form.save()
+            material = form.save()
+            # Записываем приход в историю склада
+            MaterialLog.objects.create(
+                material=material,
+                quantity=material.total_stock,
+                action_type='in',
+                description="Первоначальное внесение / Приход товара"
+            )
             return redirect('warehouse')
     else:
         form = MaterialForm()
     return render(request, 'orders/material_form.html', {'form': form})
+
+@login_required
+def finance_report(request):
+    """Бизнес-аналитика: выручка, себестоимость и прибыль по услугам"""
+    # Анализируем только выполненные заказы
+    orders = Order.objects.filter(status__in=['ready', 'issued'])
+    
+    total_revenue = sum(o.total_amount for o in orders)
+    total_profit = sum(o.total_profit for o in orders)
+    total_cost = total_revenue - total_profit
+    
+    service_stats = {}
+    for order in orders:
+        for item in order.items.all():
+            name = item.product.name
+            if name not in service_stats:
+                service_stats[name] = {'revenue': 0, 'profit': 0, 'quantity': 0}
+            
+            service_stats[name]['revenue'] += item.total_price
+            service_stats[name]['profit'] += item.profit
+            service_stats[name]['quantity'] += item.quantity
+
+    # Расчет рентабельности каждой услуги для отчета
+    for name in service_stats:
+        rev = service_stats[name]['revenue']
+        prof = service_stats[name]['profit']
+        # Вычисляем процент маржи
+        service_stats[name]['margin'] = (prof / rev * 100) if rev > 0 else 0
+
+    context = {
+        'total_revenue': total_revenue,
+        'total_profit': total_profit,
+        'total_cost': total_cost,
+        'orders_count': orders.count(),
+        'service_stats': service_stats,
+    }
+    return render(request, 'orders/finance_report.html', context)

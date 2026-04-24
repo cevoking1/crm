@@ -5,14 +5,12 @@
 <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
     <div>
         <h1 class="text-4xl font-light text-[#1a1b1f]">Рабочий поток</h1>
-        <p class="text-[#44474e] mt-2 italic text-sm">
-            Управление заказами и производством
-        </p>
+        <p class="text-[#44474e] mt-2 italic text-sm">Управление заказами и производством</p>
     </div>
     
     <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
         {% if user.is_superuser or perms.orders.add_order %}
-            <a href="{% url 'order_create' %}" class="m3-btn-primary py-2.5 px-6 text-sm shadow-sm whitespace-nowrap flex items-center gap-2">
+            <a href="{% url 'order_create' %}" class="m3-btn-primary py-2.5 px-6 text-sm shadow-sm flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
@@ -29,89 +27,84 @@
                 </svg>
             </div>
             <button type="submit" class="m3-btn-tonal text-xs py-2 px-4 shadow-sm">Найти</button>
-            {% if query %}
-                <a href="{% url 'order_list' %}" class="m3-btn-tonal bg-red-50 text-red-700 hover:bg-red-100 text-xs py-2 px-4 italic">Сброс</a>
-            {% endif %}
         </form>
     </div>
 </header>
 
 <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-    <div class="surface p-8 bg-[#d3e4ff] transition-transform hover:scale-[1.02] border-none shadow-md">
-        <p class="text-xs font-bold text-[#001c3b] uppercase tracking-wider">Касса сегодня</p>
+    <div class="surface p-8 bg-[#d3e4ff] border-none shadow-md">
+        <p class="text-xs font-bold text-[#001c3b] uppercase tracking-wider">Выручка сегодня</p>
         <p class="text-4xl font-bold mt-2 text-[#001c3b]">{{ total_today|floatformat:0|intcomma }} <span class="text-lg font-normal">₸</span></p>
     </div>
     
-    <div class="surface p-8 bg-white border-[#e1e2ec] transition-transform hover:scale-[1.02]">
-        <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">В производстве</p>
-        <p class="text-4xl font-bold mt-2 text-[#1a1b1f]">{{ count_in_progress }}</p>
+    <div class="surface p-8 bg-[#c2eed0] border-none shadow-md">
+        <p class="text-xs font-bold text-[#00210b] uppercase tracking-wider text-green-700">Чистая прибыль</p>
+        <p class="text-4xl font-bold mt-2 text-[#00210b]">{{ profit_today|floatformat:0|intcomma }} <span class="text-lg font-normal">₸</span></p>
     </div>
 
-    <div class="surface p-8 bg-white border-l-4 border-l-red-400 transition-transform hover:scale-[1.02]">
+    <div class="surface p-8 bg-white border-l-4 border-l-red-400">
         <p class="text-xs font-bold text-red-500 uppercase tracking-wider">Брак сегодня</p>
         <p class="text-4xl font-bold mt-2 text-[#1a1b1f]">{{ count_defects }}</p>
     </div>
 </section>
 
 <div class="surface overflow-hidden bg-white shadow-sm border-[#e1e2ec]">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left">
-            <thead>
-                <tr class="text-[#44474e] text-xs border-b border-[#e1e2ec] bg-[#fdfcff]">
-                    <th class="px-8 py-4 font-bold uppercase tracking-widest">Заказ / Клиент</th>
-                    <th class="px-6 py-4 font-bold uppercase tracking-widest text-center">Этап</th>
-                    <th class="px-6 py-4 font-bold uppercase tracking-widest">Бюджет</th>
-                    <th class="px-8 py-4 text-right">Управление</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-[#e1e2ec]">
-                {% for o in orders %}
-                <tr class="hover:bg-[#f1f0f4] transition-colors group">
-                    <td class="px-8 py-5">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-mono text-[#74777f]">ID #{{ o.id }}</span>
-                            <a href="{% url 'order_detail' o.id %}" class="font-bold text-[#1a1b1f] hover:text-[#005ac1] underline decoration-blue-100 underline-offset-4">
-                                {{ o.client_name }}
-                            </a>
-                        </div>
-                    </td>
-                    <td class="px-6 py-5 text-center">
-                        <span class="px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight
-                            {% if o.status == 'new' %} bg-[#e1e2ec] text-[#1a1b1f]
-                            {% elif o.status == 'in_progress' %} bg-[#ffd946] text-[#241a00]
-                            {% elif o.status == 'ready' %} bg-[#c2eed0] text-[#00210b]
-                            {% elif o.status == 'issued' %} bg-slate-100 text-slate-400
-                            {% endif %}">
-                            {{ o.get_status_display }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-5 font-bold text-[#1a1b1f]">
-                        {{ o.total_amount|floatformat:0|intcomma }} <span class="text-[10px] font-normal text-slate-400 ml-1">₸</span>
-                    </td>
-                    <td class="px-8 py-5 text-right">
-                        <div class="flex justify-end gap-2">
-                            {% if o.status == 'new' %}
-                                <a href="{% url 'update_status' o.id 'in_progress' %}" class="m3-btn-tonal text-[10px] uppercase font-bold">В работу</a>
-                            {% elif o.status == 'in_progress' %}
-                                <a href="{% url 'update_status' o.id 'ready' %}" class="m3-btn-tonal bg-[#c2eed0] text-[#00210b] text-[10px] uppercase font-bold">Готово</a>
-                            {% endif %}
-                            <a href="{% url 'order_detail' o.id %}" class="p-2 text-slate-400 hover:text-[#005ac1] rounded-full hover:bg-blue-50 transition-all">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                </svg>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-8 py-20 text-center text-slate-400 italic font-light">
-                        Заказов пока нет.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <table class="w-full text-left">
+        <thead>
+            <tr class="text-[#44474e] text-xs border-b border-[#e1e2ec] bg-[#fdfcff]">
+                <th class="px-8 py-4 font-bold uppercase tracking-widest">ID / Клиент</th>
+                <th class="px-6 py-4 font-bold uppercase tracking-widest text-center">Этап</th>
+                <th class="px-6 py-4 font-bold uppercase tracking-widest">Бюджет</th>
+                <th class="px-8 py-4 text-right">Управление</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-[#e1e2ec]">
+            {% for o in orders %}
+            <tr class="hover:bg-[#f1f0f4] transition-colors group">
+                <td class="px-8 py-5">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-mono text-[#74777f]">ЗАКАЗ #{{ o.id }}</span>
+                        <a href="{% url 'order_detail' o.id %}" class="font-bold text-[#1a1b1f] hover:text-[#005ac1] underline decoration-blue-100 underline-offset-4">
+                            {{ o.client_name }}
+                        </a>
+                    </div>
+                </td>
+                <td class="px-6 py-5 text-center">
+                    <span class="px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight
+                        {% if o.status == 'new' %} bg-[#e1e2ec] text-[#1a1b1f]
+                        {% elif o.status == 'in_progress' %} bg-[#ffd946] text-[#241a00] animate-pulse
+                        {% elif o.status == 'ready' %} bg-[#c2eed0] text-[#00210b]
+                        {% elif o.status == 'issued' %} bg-slate-100 text-slate-400
+                        {% endif %}">
+                        {{ o.get_status_display }}
+                    </span>
+                </td>
+                <td class="px-6 py-5 font-bold text-[#1a1b1f]">
+                    {{ o.total_amount|floatformat:0|intcomma }} <span class="text-[10px] font-normal text-slate-400 ml-1">₸</span>
+                </td>
+                <td class="px-8 py-5 text-right">
+                    <div class="flex justify-end gap-2">
+                        {% if o.status == 'new' %}
+                            <form action="{% url 'update_status' o.id 'in_progress' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="m3-btn-tonal text-[10px] uppercase font-bold">В работу</button>
+                            </form>
+                        {% elif o.status == 'in_progress' %}
+                            <form action="{% url 'update_status' o.id 'ready' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="m3-btn-tonal bg-[#c2eed0] text-[#00210b] text-[10px] uppercase font-bold">Готово</button>
+                            </form>
+                        {% endif %}
+                        <a href="{% url 'order_detail' o.id %}" class="p-2 text-slate-400 hover:text-[#005ac1] rounded-full hover:bg-blue-50 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

@@ -1,15 +1,20 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv #
+
+# Загружаем переменные из файла .env
+load_dotenv()
 
 # Корень проекта
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Безопасность
-SECRET_KEY = 'django-insecure-90gbdsq2#!0kvp9orgl)v6$)hzx(_vy6^a%)@(4=4ucb+9x7zk'
-DEBUG = True
+# Безопасность: данные теперь берутся из .env
+SECRET_KEY = os.getenv('SECRET_KEY') #
+DEBUG = os.getenv('DEBUG', 'False') == 'True' #
 
-# РАЗРЕШЕННЫЕ АДРЕСА: локальный IP и стандартные локалхосты
-ALLOWED_HOSTS = ['192.168.0.111', '127.0.0.1', 'localhost']
+# РАЗРЕШЕННЫЕ АДРЕСА: список берется из .env
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') #
+
 
 # ПРИЛОЖЕНИЯ
 INSTALLED_APPS = [
@@ -37,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = 'core.urls' #
 
 TEMPLATES = [
     {
@@ -54,7 +59,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = 'core.wsgi.application' #
+
 
 # БАЗА ДАННЫХ
 DATABASES = {
@@ -64,6 +70,7 @@ DATABASES = {
     }
 }
 
+
 # ВАЛИДАЦИЯ ПАРОЛЕЙ
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -72,11 +79,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+
 # ИНТЕРНАЦИОНАЛИЗАЦИЯ
 LANGUAGE_CODE = 'ru'
-TIME_ZONE = 'Asia/Almaty'
+TIME_ZONE = 'Asia/Almaty' #
+
 USE_I18N = True
 USE_TZ = True
+
 
 # НАСТРОЙКИ ФОРМАТИРОВАНИЯ ЧИСЕЛ (для цен с пробелами)
 USE_L10N = True
@@ -84,15 +94,19 @@ USE_THOUSAND_SEPARATOR = True
 THOUSAND_SEPARATOR = ' '
 NUMBER_GROUPING = 3
 
+
 # СТАТИКА
 STATIC_URL = 'static/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 
 # НАСТРОЙКИ АВТОРИЗАЦИИ
 LOGIN_REDIRECT_URL = 'order_list'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
-# Telegram Settings
-TELEGRAM_BOT_TOKEN = '8514173753:AAHkczBcRi8NGGCJEDNlbyMEoM1DGObrwr4'
-TELEGRAM_CHAT_ID = '@greszharnamabot'
+
+# Telegram Settings: данные теперь берутся из .env
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN') #
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID') #
