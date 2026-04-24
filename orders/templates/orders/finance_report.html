@@ -2,63 +2,106 @@
 {% load humanize %}
 
 {% block content %}
-<header class="mb-10">
-    <h1 class="text-4xl font-light text-[#1a1b1f]">Финансовый отчет</h1>
-    <p class="text-[#44474e] mt-2 italic text-sm">Анализ прибыльности и расходов на материалы</p>
-</header>
-
-<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-    <div class="surface p-8 bg-white border-l-4 border-l-blue-500 shadow-sm">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Общая выручка</p>
-        <p class="text-4xl font-bold mt-2 text-[#1a1b1f]">{{ total_revenue|floatformat:0|intcomma }} ₸</p>
-    </div>
-    
-    <div class="surface p-8 bg-[#c2eed0] border-none shadow-md">
-        <p class="text-[10px] font-bold text-[#00210b] uppercase tracking-widest">Чистая прибыль</p>
-        <p class="text-4xl font-bold mt-2 text-[#00210b]">{{ total_profit|floatformat:0|intcomma }} ₸</p>
+<div class="flex flex-col gap-10">
+    <div class="space-y-1">
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Аналитика бизнеса</h1>
+        <p class="text-slate-500 text-sm font-medium">Эффективность услуг и контроль расходов на материалы</p>
     </div>
 
-    <div class="surface p-8 bg-white border-l-4 border-l-red-400">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Затраты на материалы</p>
-        <p class="text-4xl font-bold mt-2 text-red-600">{{ total_cost|floatformat:0|intcomma }} ₸</p>
-    </div>
-</section>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="glass-card p-8 flex flex-col justify-between group hover:border-indigo-200 transition-all cursor-default">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Общая выручка</p>
+            <div class="mt-4 flex items-baseline gap-1">
+                <span class="text-4xl font-black text-slate-900 tracking-tighter">{{ total_revenue|floatformat:0|intcomma }}</span>
+                <span class="text-slate-400 font-bold">₸</span>
+            </div>
+        </div>
 
-<div class="surface bg-white overflow-hidden shadow-sm border-[#e1e2ec]">
-    <div class="p-6 border-b border-[#e1e2ec] bg-[#fdfcff]">
-        <h2 class="font-bold text-[#005ac1] uppercase text-xs tracking-widest">Эффективность услуг</h2>
+        <div class="glass-card p-8 bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-100 flex flex-col justify-between group">
+            <p class="text-[11px] font-bold text-indigo-200 uppercase tracking-[0.15em]">Чистая прибыль</p>
+            <div class="mt-4 flex items-baseline gap-1 text-white">
+                <span class="text-4xl font-black tracking-tighter">{{ total_profit|floatformat:0|intcomma }}</span>
+                <span class="text-indigo-300 font-bold">₸</span>
+            </div>
+        </div>
+
+        <div class="glass-card p-8 flex flex-col justify-between group hover:border-red-100 transition-all cursor-default">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.15em]">Затраты на материалы</p>
+            <div class="mt-4 flex items-baseline gap-1 text-red-500">
+                <span class="text-4xl font-black tracking-tighter">{{ total_cost|floatformat:0|intcomma }}</span>
+                <span class="text-red-300 font-bold">₸</span>
+            </div>
+        </div>
     </div>
-    <table class="w-full text-left">
-        <thead>
-            <tr class="text-[#44474e] text-[10px] uppercase tracking-tighter border-b border-[#e1e2ec]">
-                <th class="px-8 py-4">Услуга</th>
-                <th class="px-6 py-4">Продано</th>
-                <th class="px-6 py-4">Выручка</th>
-                <th class="px-6 py-4">Прибыль</th>
-                <th class="px-8 py-4 text-right">Рентабельность</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-[#e1e2ec]">
-            {% for name, stats in service_stats.items %}
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-8 py-5 font-bold text-[#1a1b1f]">{{ name }}</td>
-                <td class="px-6 py-5 text-slate-500">{{ stats.quantity }} шт.</td>
-                <td class="px-6 py-5">{{ stats.revenue|floatformat:0|intcomma }} ₸</td>
-                <td class="px-6 py-5 font-bold text-green-600">{{ stats.profit|floatformat:0|intcomma }} ₸</td>
-                <td class="px-8 py-5 text-right">
-                    <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold">
-                        {{ stats.margin|floatformat:1 }}%
-                    </span>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <div class="glass-card overflow-hidden">
+        <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h2 class="text-xs font-bold text-slate-700 uppercase tracking-widest">Эффективность услуг</h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Всего заказов: {{ orders_count }}</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] border-b border-slate-100">
+                        <th class="px-8 py-4">Услуга</th>
+                        <th class="px-6 py-4">Выручка</th>
+                        <th class="px-6 py-4 text-indigo-600">Прибыль</th>
+                        <th class="px-8 py-4 text-right">Рентабельность</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for name, stats in service_stats.items %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="px-8 py-5">
+                            <p class="font-bold text-slate-900 leading-tight">{{ name }}</p>
+                            <p class="text-[11px] text-slate-400 font-medium mt-0.5">Продано: {{ stats.quantity }} шт.</p>
+                        </td>
+                        <td class="px-6 py-5 text-sm font-semibold text-slate-600">
+                            {{ stats.revenue|floatformat:0|intcomma }} ₸
+                        </td>
+                        <td class="px-6 py-5 text-sm font-bold text-indigo-600">
+                            {{ stats.profit|floatformat:0|intcomma }} ₸
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <div class="inline-flex flex-col items-end gap-1.5">
+                                <span class="text-xs font-black text-slate-900">{{ stats.margin|floatformat:1 }}%</span>
+                                <div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-indigo-500 rounded-full transition-all duration-1000 js-margin-bar" 
+                                         data-margin="{{ stats.margin|floatformat:0 }}"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="p-6 bg-slate-100/50 rounded-2xl border border-slate-200 border-dashed flex items-center gap-4">
+        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <p class="text-[11px] text-slate-500 leading-relaxed italic uppercase font-bold tracking-tight">
+            Отчет формируется на основе завершенных заказов. Себестоимость рассчитывается автоматически исходя из фактического расхода материала и цены закупа со склада.
+        </p>
+    </div>
 </div>
 
-<div class="mt-8 p-6 bg-slate-50 rounded-[28px] border border-slate-200">
-    <p class="text-xs text-slate-500 italic">
-        * Отчет формируется на основе завершенных заказов. Себестоимость рассчитывается автоматически исходя из фактического расхода материала и цены закупа.
-    </p>
-</div>
+<script>
+    // Плавное заполнение баров маржинальности через JS
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.js-margin-bar').forEach(bar => {
+            const margin = bar.getAttribute('data-margin');
+            // Ограничиваем ширину от 0 до 100%
+            const width = Math.min(Math.max(parseInt(margin) || 0, 0), 100);
+            setTimeout(() => {
+                bar.style.width = width + '%';
+            }, 200);
+        });
+    });
+</script>
 {% endblock %}

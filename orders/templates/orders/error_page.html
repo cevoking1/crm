@@ -1,28 +1,45 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="max-w-2xl mx-auto mt-20 text-center">
-    <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    <div class="w-20 h-20 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-sm border border-red-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
     </div>
-    <h1 class="text-4xl font-light text-[#1a1b1f] mb-4">Материалы закончились!</h1>
-    <p class="text-[#44474e] italic mb-10 leading-relaxed">
-        Мы не смогли запустить <b>Заказ №{{ order.id }}</b> в производство, так как на складе не хватает следующих позиций:
+
+    <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-4">Недостаточно материалов</h1>
+    <p class="text-slate-500 font-medium mb-10 leading-relaxed px-4">
+        Запуск <span class="text-slate-900 font-bold">Заказа №{{ order.id }}</span> приостановлен. Для производства не хватает следующих ресурсов:
     </p>
 
-    <div class="surface p-8 bg-white border-red-100 text-left space-y-4 mb-10">
+    <div class="glass-card p-8 text-left space-y-4 mb-10 border-red-100/50 bg-white/50">
         {% for error in errors %}
-            <div class="flex items-center gap-3 text-red-600 font-bold">
-                <div class="w-1.5 h-6 bg-red-500 rounded-full"></div>
-                {{ error }}
+            <div class="flex items-center gap-4 text-red-600">
+                <div class="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div>
+                <span class="text-sm font-bold uppercase tracking-wide">{{ error }}</span>
             </div>
         {% endfor %}
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="{% url 'warehouse' %}" class="m3-btn-primary bg-slate-800">Пополнить склад</a>
-        <a href="{% url 'order_detail' order.id %}" class="m3-btn-tonal border border-slate-200">Вернуться к заказу</a>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="{% url 'warehouse' %}" class="btn-primary w-full sm:w-auto px-8 bg-slate-900 hover:bg-slate-800 border-none shadow-xl shadow-slate-200 uppercase tracking-widest text-xs font-black">
+            Пополнить склад
+        </a>
+        <a href="{% url 'order_detail' order.id %}" class="btn-secondary w-full sm:w-auto px-8 uppercase tracking-widest text-xs font-black">
+            К деталям заказа
+        </a>
     </div>
+
+    <p class="mt-12 text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+        Система автоматического контроля остатков Gres CRM
+    </p>
 </div>
+
+<style>
+    /* Дополнительный мягкий эффект для страницы ошибки */
+    body {
+        background: radial-gradient(circle at center, #fff 0%, #f8fafc 100%);
+    }
+</style>
 {% endblock %}

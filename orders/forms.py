@@ -44,7 +44,7 @@ OrderItemFormSet = inlineformset_factory(
     Order, 
     OrderItem,
     fields=['product', 'material', 'width', 'height', 'quantity'],
-    extra=3,
+    extra=1,
     can_delete=True,
     widgets={
         'product': forms.Select(attrs={'class': 'm3-input py-2'}),

@@ -1,113 +1,104 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <header class="mb-10 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-[#d3e4ff] text-[#001c3b] rounded-2xl mb-4 shadow-sm">
-            {% if is_edit %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+    <header class="mb-10 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'order_list' %}" class="btn-secondary p-2.5 rounded-xl group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-            {% else %}
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-            {% endif %}
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">
+                    {% if is_edit %}Редактирование заказа{% else %}Новое задание{% endif %}
+                </h1>
+                <p class="text-slate-500 text-sm font-medium">Заполните данные клиента и спецификации заказа</p>
+            </div>
         </div>
-        <h1 class="text-4xl font-light text-[#1a1b1f]">
-            {% if is_edit %}Редактирование заказа{% else %}Новое задание{% endif %}
-        </h1>
-        <p class="text-[#44474e] mt-2 italic">Введите данные клиента и выберите материалы со склада</p>
     </header>
 
-    <form method="post" class="space-y-8 pb-20">
+    <form method="post" class="space-y-8 pb-24">
         {% csrf_token %}
         
-        <div class="surface p-8 bg-white border-[#e1e2ec]">
-            <div class="flex items-center gap-3 mb-6 border-b border-slate-50 pb-2">
-                <div class="w-2 h-6 bg-[#005ac1] rounded-full"></div>
-                <h2 class="text-sm font-bold text-[#005ac1] uppercase tracking-widest">Информация о клиенте</h2>
+        <div class="glass-card p-8">
+            <div class="flex items-center gap-3 mb-6 border-b border-slate-50 pb-4">
+                <div class="w-1.5 h-5 bg-indigo-600 rounded-full"></div>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Данные клиента</h2>
             </div>
             <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">ФИО Клиента или Название компании</label>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">Заказчик (ФИО / Компания)</label>
                 {{ form.client_name }}
                 {% if form.client_name.errors %}
-                    <p class="text-red-500 text-[10px] mt-1 ml-4 italic font-bold uppercase">{{ form.client_name.errors }}</p>
+                    <p class="text-red-500 text-[10px] mt-1 ml-1 font-bold uppercase">{{ form.client_name.errors }}</p>
                 {% endif %}
             </div>
         </div>
 
         <div class="space-y-6">
-            <div class="flex items-center justify-between px-4">
-                <h3 class="text-lg font-medium text-[#1a1b1f] uppercase tracking-tighter">Позиции для печати</h3>
-                <span class="text-[10px] font-mono text-[#74777f] bg-white px-4 py-1.5 rounded-full border border-[#e1e2ec] uppercase shadow-sm">
-                    Строк: {{ formset.total_form_count }}
+            <div class="flex items-center justify-between px-2">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em]">Позиции заказа</h3>
+                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase">
+                    Всего: {{ formset.total_form_count }}
                 </span>
             </div>
 
             {{ formset.management_form }}
             
-            {% for item_form in formset %}
-            <div class="surface p-8 bg-white border-[#e1e2ec] relative transition-all hover:shadow-lg group">
-                <div class="absolute -left-3 top-8 w-10 h-10 bg-[#f0f0f3] text-[#005ac1] rounded-2xl flex items-center justify-center text-sm font-bold border-4 border-[#f8f9ff] shadow-sm">
-                    {{ forloop.counter }}
+            <div class="space-y-4">
+                {% for item_form in formset %}
+                <div class="glass-card p-8 relative group transition-all hover:border-indigo-200">
+                    <div class="absolute -left-3 top-8 w-8 h-8 bg-white border border-slate-200 text-indigo-600 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm">
+                        {{ forloop.counter }}
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div class="md:col-span-6 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Тип услуги</label>
+                            {{ item_form.product }}
+                        </div>
+
+                        <div class="md:col-span-6 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Материал</label>
+                            {{ item_form.material }}
+                        </div>
+
+                        <div class="md:col-span-4 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Ширина (м)</label>
+                            {{ item_form.width }}
+                        </div>
+                        
+                        <div class="md:col-span-4 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Высота (м)</label>
+                            {{ item_form.height }}
+                        </div>
+
+                        <div class="md:col-span-4 space-y-1.5">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Тираж (шт)</label>
+                            {{ item_form.quantity }}
+                        </div>
+                    </div>
+
+                    {% if formset.can_delete %}
+                        <div class="mt-6 flex justify-end">
+                            <label class="flex items-center gap-2 cursor-pointer group/del">
+                                <span class="text-[10px] font-bold text-slate-300 group-hover/del:text-red-400 transition-colors uppercase tracking-widest">Удалить позицию</span>
+                                {{ item_form.DELETE }}
+                            </label>
+                        </div>
+                    {% endif %}
+
+                    {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                    <div class="md:col-span-5 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Тип услуги</label>
-                        {{ item_form.product }}
-                    </div>
-
-                    <div class="md:col-span-7 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Материал (Склад)</label>
-                        {{ item_form.material }}
-                    </div>
-
-                    <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Ширина (м)</label>
-                        {{ item_form.width }}
-                    </div>
-                    
-                    <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Высота (м)</label>
-                        {{ item_form.height }}
-                    </div>
-
-                    <div class="md:col-span-4 space-y-2">
-                        <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-[0.1em] ml-1">Кол-во (шт)</label>
-                        {{ item_form.quantity }}
-                    </div>
-                </div>
-
-                {% if formset.can_delete %}
-                    <div class="mt-6 flex items-center justify-end gap-2 text-[#74777f] opacity-30 hover:opacity-100 transition-opacity">
-                        <label class="text-[10px] font-bold uppercase tracking-tighter">Удалить из списка</label>
-                        {{ item_form.DELETE }}
-                    </div>
-                {% endif %}
-
-                {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
-                
-                {% if item_form.errors %}
-                    <div class="mt-6 p-4 bg-red-50 rounded-2xl border-2 border-red-100 border-dashed">
-                        <p class="text-[10px] text-red-600 font-bold uppercase tracking-widest leading-tight">
-                            Ошибка: Проверьте размеры и выбор товара.
-                        </p>
-                    </div>
-                {% endif %}
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
 
-        <div class="flex flex-col md:flex-row items-center justify-between gap-8 pt-8 border-t border-[#e1e2ec]">
-            <a href="{% url 'order_list' %}" class="text-sm font-bold text-[#44474e] hover:text-red-500 flex items-center gap-2 group transition-colors uppercase tracking-tighter">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform group-hover:-translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 pt-10 border-t border-slate-200">
+            <a href="{% url 'order_list' %}" class="btn-secondary w-full md:w-auto">
                 Отмена
             </a>
             
-            <button type="submit" class="m3-btn-primary w-full md:w-auto px-16 py-5 text-xl shadow-2xl active:scale-95 transition-all uppercase tracking-tighter">
+            <button type="submit" class="btn-primary w-full md:w-auto px-12 py-4 text-lg shadow-xl shadow-indigo-100">
                 {% if is_edit %}Сохранить изменения{% else %}Запустить в производство{% endif %}
             </button>
         </div>
@@ -115,18 +106,12 @@
 </div>
 
 <style>
-    /* Кастомная стилизация для инпутов в стиле Material 3 */
+    /* Переопределяем стандартные стили Django для соответствия Modern Minimalist */
     select, input[type="text"], input[type="number"] {
-        @apply m3-input !bg-[#f0f0f3] border-none focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-800;
-    }
-    input::placeholder {
-        @apply text-slate-400 font-normal italic;
+        @apply form-input;
     }
     input[type="checkbox"] {
-        @apply w-5 h-5 rounded-md border-[#e1e2ec] text-[#005ac1] focus:ring-[#005ac1];
-    }
-    .surface {
-        border-width: 1px !important;
+        @apply w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer;
     }
 </style>
 {% endblock %}

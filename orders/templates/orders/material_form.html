@@ -1,68 +1,68 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <header class="mb-10 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-[#d3e4ff] text-[#001c3b] rounded-2xl mb-4 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-        </div>
-        <h1 class="text-4xl font-light text-[#1a1b1f]">Добавить материал</h1>
-        <p class="text-[#44474e] mt-2 italic text-sm">Используйте готовые шаблоны для быстрой настройки</p>
+    <header class="mb-10 text-center space-y-2">
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Пополнение склада</h1>
+        <p class="text-slate-500 text-sm font-medium italic">Внесите данные о новом материале или используйте шаблон</p>
     </header>
 
-    <form method="post" class="surface p-8 bg-white space-y-6">
+    <form method="post" class="space-y-6">
         {% csrf_token %}
         
-        <div class="p-6 bg-blue-50 rounded-[24px] border border-blue-100 mb-8">
-            <label class="text-[10px] font-bold text-blue-600 uppercase tracking-widest ml-4 mb-2 block italic">Шаблон для автозаполнения</label>
+        <div class="glass-card p-8 bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-100">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-2 bg-indigo-500 rounded-lg text-white">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2.5"/></svg>
+                </div>
+                <label class="text-[11px] font-black text-indigo-100 uppercase tracking-[0.2em]">Шаг 1: Быстрый выбор из готовых</label>
+            </div>
             {{ form.template }}
+            <p class="text-[10px] text-indigo-200 mt-3 ml-1 font-medium italic">* Все параметры ниже заполнятся автоматически</p>
         </div>
 
-        <div class="space-y-6">
-            <div class="space-y-2">
-                <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Название материала</label>
+        <div class="glass-card p-8 space-y-6">
+            <div class="space-y-1.5">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Название материала</label>
                 {{ form.name }}
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Ширина (м)</label>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Ширина (м)</label>
                     {{ form.width }}
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Высота (м)</label>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Высота (м)</label>
                     {{ form.height }}
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Тип</label>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Тип закупа</label>
                     {{ form.material_type }}
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Цена закупа (за ед.)</label>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Цена закупа (₸)</label>
                     {{ form.purchase_price }}
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Кол-во (текущий остаток)</label>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Кол-во (Приход)</label>
                     {{ form.total_stock }}
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-[#74777f] uppercase tracking-widest ml-4">Критический порог</label>
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Крит. порог</label>
                     {{ form.min_stock }}
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center justify-between pt-6 border-t border-[#e1e2ec]">
-            <a href="{% url 'warehouse' %}" class="text-sm font-bold text-[#44474e] hover:text-red-500 uppercase tracking-tighter">Отмена</a>
-            <button type="submit" class="m3-btn-primary px-10 py-3 shadow-lg uppercase tracking-tighter">Сохранить</button>
+        <div class="flex items-center justify-between pt-4 pb-12">
+            <a href="{% url 'warehouse' %}" class="btn-secondary">Назад к складу</a>
+            <button type="submit" class="btn-primary px-10 shadow-lg shadow-indigo-100">Сохранить на склад</button>
         </div>
     </form>
 </div>
@@ -92,11 +92,22 @@
         if (data) {
             document.getElementById('id_name').value = data.name;
             document.getElementById('id_type').value = data.type;
-            // Подставляем размеры и цену
             document.getElementById('id_width').value = parseFloat(data.width);
             document.getElementById('id_height').value = parseFloat(data.height);
             document.getElementById('id_purchase_price').value = parseFloat(data.price);
+            
+            // Визуальный эффект успешного заполнения
+            const inputs = ['id_name', 'id_width', 'id_height', 'id_purchase_price'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.add('ring-4', 'ring-emerald-500/20', 'border-emerald-500');
+                setTimeout(() => el.classList.remove('ring-4', 'ring-emerald-500/20', 'border-emerald-500'), 1000);
+            });
         }
     }
 </script>
+
+<style>
+    select, input[type="text"], input[type="number"] { @apply form-input; }
+</style>
 {% endblock %}

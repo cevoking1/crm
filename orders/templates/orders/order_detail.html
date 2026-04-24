@@ -2,111 +2,166 @@
 {% load humanize %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto">
-    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
-        <div class="flex items-center gap-6">
-            <a href="{% url 'order_list' %}" class="w-12 h-12 flex items-center justify-center rounded-full bg-[#f0f0f3] hover:bg-[#e1e2ec] transition-colors shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-[#44474e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+<div class="flex flex-col gap-8">
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+            <a href="{% url 'order_list' %}" class="btn-secondary p-2.5 rounded-xl group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
             </a>
             <div>
-                <h1 class="text-3xl font-light text-[#1a1b1f]">Заказ №{{ order.id }}</h1>
-                <p class="text-[#74777f] font-medium italic underline decoration-blue-200 underline-offset-4">{{ order.client_name }}</p>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Заказ №{{ order.id }}</h1>
+                    <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-indigo-100/50">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <p class="text-slate-500 font-medium mt-0.5">{{ order.client_name }}</p>
             </div>
         </div>
 
-        <a href="{% url 'order_edit' order.id %}" class="m3-btn-tonal flex items-center gap-2 px-6 py-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Изменить
-        </a>
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <button onclick="window.print()" class="btn-secondary flex-grow md:flex-grow-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                Печать ТЗ
+            </button>
+            <a href="{% url 'order_edit' order.id %}" class="btn-secondary flex-grow md:flex-grow-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                Изменить
+            </a>
+        </div>
     </header>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div class="lg:col-span-2 space-y-6">
-            <div class="surface p-8 bg-white border-[#e1e2ec]">
-                <h3 class="text-[#005ac1] font-bold uppercase text-xs tracking-[0.2em] mb-8">Техническое задание</h3>
+            <div class="glass-card overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 bg-slate-50/30 flex justify-between items-center">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Техническое задание</h2>
+                    <span class="text-[10px] font-bold text-slate-400 font-mono italic">S_total = {{ order.total_area|floatformat:2 }} м²</span>
+                </div>
 
-                <div class="divide-y divide-[#e1e2ec]">
+                <div class="divide-y divide-slate-100">
                     {% for item in order.items.all %}
-                    <div class="py-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 {% if item.is_defective %}bg-red-50/50 -mx-4 px-4 rounded-[28px]{% endif %} transition-all">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-3">
-                                <p class="font-bold text-2xl text-[#1a1b1f]">{{ item.product.name }}</p>
-                                {% if item.is_defective %}
-                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Брак</span>
-                                {% endif %}
+                    <div class="p-8 group hover:bg-slate-50/30 transition-all {% if item.is_defective %}bg-red-50/40{% endif %}">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div class="space-y-3 flex-grow">
+                                <div class="flex items-center gap-3">
+                                    <h3 class="text-xl font-bold text-slate-800">{{ item.product.name }}</h3>
+                                    {% if item.is_defective %}
+                                        <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-tighter shadow-sm">Брак</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-3">
+                                    <div class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs shadow-sm">
+                                        <span class="text-slate-400 font-bold uppercase mr-1">Размер:</span>
+                                        <span class="text-slate-900 font-bold">{{ item.width }} × {{ item.height }} м.</span>
+                                    </div>
+                                    <div class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs shadow-sm">
+                                        <span class="text-slate-400 font-bold uppercase mr-1">Материал:</span>
+                                        <span class="text-indigo-600 font-semibold">{{ item.material.name|default:"Не указан" }}</span>
+                                    </div>
+                                    <div class="px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg text-xs shadow-sm">
+                                        <span class="text-indigo-400 font-bold uppercase mr-1">Расход:</span>
+                                        <span class="text-indigo-700 font-bold">{{ item.consumption|floatformat:2 }} {% if item.material.material_type == 'roll' %}п.м.{% else %}шт.{% endif %}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#44474e]">
-                                <p class="bg-slate-50 px-2 py-1 rounded text-xs">Материал: <span class="italic text-[#005ac1]">{{ item.material.name|default:"Не указан" }}</span></p>
-                                <p class="bg-slate-50 px-2 py-1 rounded text-xs">Расход: <b>{{ item.consumption|floatformat:2 }} м/шт</b></p>
-                            </div>
-                        </div>
 
-                        <div class="flex items-center gap-8 self-end md:self-center">
-                            <div class="text-right">
-                                <p class="text-3xl font-light text-[#1a1b1f]">x{{ item.quantity }}</p>
-                                <p class="text-[10px] text-[#74777f] font-mono mt-1 italic">Прибыль: {{ item.profit|floatformat:0 }} ₸</p>
+                            <div class="flex items-center gap-6 self-end md:self-center">
+                                <div class="text-right">
+                                    <p class="text-4xl font-bold text-slate-900 tracking-tighter">×{{ item.quantity }}</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest">Прибыль: {{ item.profit|floatformat:0 }} ₸</p>
+                                </div>
+                                
+                                <form action="{% url 'mark_defect' item.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="w-12 h-12 flex items-center justify-center rounded-xl transition-all border-2
+                                        {% if item.is_defective %} bg-red-600 border-red-600 text-white shadow-lg shadow-red-200 {% else %} bg-white border-slate-200 text-slate-300 hover:text-red-500 hover:border-red-100 hover:bg-red-50 {% endif %}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </button>
+                                </form>
                             </div>
-                            
-                            <form action="{% url 'mark_defect' item.id %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="w-12 h-12 flex items-center justify-center rounded-2xl transition-all 
-                                    {% if item.is_defective %} bg-red-600 text-white shadow-md {% else %} bg-[#f0f0f3] text-[#74777f] hover:bg-red-50 hover:text-red-600 {% endif %}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                </button>
-                            </form>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
+            
+            <div class="p-6 bg-indigo-600 rounded-2xl flex justify-between items-center text-white shadow-lg shadow-indigo-200">
+                <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-200">Общая площадь заказа</p>
+                    <p class="text-3xl font-bold tracking-tight mt-0.5">{{ order.total_area|floatformat:3 }} <span class="text-lg font-normal opacity-60">м²</span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-200">Менеджер</p>
+                    <p class="text-sm font-semibold mt-1 opacity-90">{{ order.created_by.get_full_name|default:order.created_by.username }}</p>
+                </div>
+            </div>
         </div>
 
         <div class="space-y-6">
-            <div class="surface p-8 bg-[#f0f0f3] border-none shadow-inner">
-                <div class="mb-10">
-                    <p class="text-[10px] font-bold text-[#44474e] uppercase mb-3 tracking-widest text-center">Состояние заказа</p>
-                    <div class="flex items-center gap-4 justify-center">
-                        <div class="w-4 h-4 rounded-full 
-                            {% if order.status == 'new' %} bg-blue-500
-                            {% elif order.status == 'in_progress' %} bg-amber-500 animate-pulse
-                            {% elif order.status == 'ready' %} bg-green-500
-                            {% elif order.status == 'issued' %} bg-slate-400
-                            {% endif %}"></div>
-                        <span class="text-2xl font-medium text-[#1a1b1f]">{{ order.get_status_display }}</span>
-                    </div>
+            <div class="glass-card p-8 bg-slate-900 border-slate-900 shadow-xl shadow-slate-200">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Чистая прибыль с заказа</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-5xl font-bold text-white tracking-tighter">{{ order.total_profit|floatformat:0|intcomma }}</span>
+                    <span class="text-xl font-medium text-slate-500">₸</span>
                 </div>
-
-                <div class="text-center">
-                    <p class="text-[10px] font-bold text-[#44474e] uppercase mb-1 tracking-widest">Чистая прибыль</p>
-                    <p class="text-5xl font-bold text-[#005ac1] tracking-tighter">{{ order.total_profit|floatformat:0|intcomma }} <span class="text-xl font-light italic">₸</span></p>
+                <div class="mt-6 pt-6 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-xs text-slate-500 font-medium">Выручка (Касса)</span>
+                    <span class="text-sm font-bold text-slate-300">{{ order.total_amount|floatformat:0|intcomma }} ₸</span>
                 </div>
             </div>
 
-            <div class="surface p-6 space-y-4 bg-white">
+            <div class="glass-card p-6 space-y-4">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mb-2">Управление производством</p>
+                
                 {% if order.status == 'new' %}
                     <form action="{% url 'update_status' order.id 'in_progress' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="m3-btn-primary w-full justify-center py-4 text-lg">Принять в работу</button>
+                        <button type="submit" class="btn-primary w-full py-4 text-base shadow-lg shadow-indigo-200">
+                            Принять в работу
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-width="2.5"></path></svg>
+                        </button>
                     </form>
                 {% elif order.status == 'in_progress' %}
                     <form action="{% url 'update_status' order.id 'ready' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="m3-btn-primary bg-[#c2eed0] text-[#00210b] hover:bg-[#afe5bf] w-full justify-center py-4 text-lg">Завершить печать</button>
+                        <button type="submit" class="btn-primary bg-emerald-600 hover:bg-emerald-700 border-none w-full py-4 text-base shadow-lg shadow-emerald-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M5 13l4 4L19 7" /></svg>
+                            Завершить печать
+                        </button>
                     </form>
                 {% elif order.status == 'ready' %}
                     <form action="{% url 'update_status' order.id 'issued' %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="m3-btn-tonal w-full justify-center py-4 border-2 border-[#005ac1] text-[#005ac1] hover:bg-blue-50 shadow-sm">Выдать клиенту</button>
+                        <button type="submit" class="btn-primary bg-slate-800 hover:bg-slate-900 border-none w-full py-4 text-base">
+                            Выдать клиенту
+                        </button>
                     </form>
                 {% endif %}
+
+                <p class="text-[10px] text-slate-400 text-center italic mt-2">Создан: {{ order.created_at|date:"d.m.Y H:i" }}</p>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    @media print {
+        aside, .btn-primary, .btn-secondary, button[type="submit"], form, .ml-64, a[href*="edit"] { display: none !important; }
+        main { margin-left: 0 !important; padding: 0 !important; }
+        body { background: white !important; }
+        .glass-card { border: 1px solid #eee !important; box-shadow: none !important; border-radius: 0 !important; }
+        .p-8 { padding: 1.5rem !important; }
+        .bg-slate-900 { background: white !important; border: 1px solid #eee !important; }
+        .bg-slate-900 * { color: black !important; }
+        .text-white { color: black !important; }
+        .bg-indigo-600 { background: #f8fafc !important; color: black !important; border: 1px solid #eee !important; }
+        .bg-indigo-600 * { color: black !important; }
+    }
+</style>
 {% endblock %}
